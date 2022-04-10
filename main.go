@@ -1,4 +1,4 @@
-package Gobruteforce
+package main
 
 import (
 	"fmt"
