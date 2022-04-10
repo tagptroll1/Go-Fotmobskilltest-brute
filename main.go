@@ -9,6 +9,7 @@ import (
 
 type void struct{}
 
+// Get user input
 func getInput(text string) string {
 	var input string
 	fmt.Print(text)
@@ -16,6 +17,7 @@ func getInput(text string) string {
 	return input
 }
 
+// Get all numbers in a range, for example "0-200"
 func getRangeNumbers(rangeStr string) []int {
 	var rangeNumbersStr []string = strings.Split(rangeStr, "-")
 	var start, end int
@@ -28,6 +30,7 @@ func getRangeNumbers(rangeStr string) []int {
 	return numbers
 }
 
+// Get all numbers in a set of string ranges, for example 0-200,300-400
 func getSliceOfNumbersFromStringRange(rangeStr string) map[int]void {
 	setOfNumber := make(map[int]void)
 	var rangeNumbersStr []string = strings.Split(rangeStr, ",")
@@ -47,24 +50,32 @@ func getSliceOfNumbersFromStringRange(rangeStr string) map[int]void {
 	return setOfNumber
 }
 
-// Get all numbers in includes, and exclude all numbers in excludes
-func getNumbers(includes, excludes string) []int {
+// Deletes all numbers in excludeRanges from includeRanges
+func excludeNumbers(includeRanges, excludeRanges *map[int]void) []int {
 	var numbers []int
+	for excludeRange := range *excludeRanges {
+		delete(*includeRanges, excludeRange)
+	}
+
+	for includeRange := range *includeRanges {
+		numbers = append(numbers, includeRange)
+	}
+
+	return numbers
+}
+
+// Get all numbers in includes, and exclude all numbers in excludes
+func parseIncludesAndExcludesToNumbers(includes string, excludes string) []int {
 	includeRanges := getSliceOfNumbersFromStringRange(includes)
 	excludeRanges := getSliceOfNumbersFromStringRange(excludes)
 
-	for excludeRange := range excludeRanges {
-		delete(includeRanges, excludeRange)
-	}
-
-	for includeRange := range includeRanges {
-		numbers = append(numbers, includeRange)
-	}
+	numbers := excludeNumbers(&includeRanges, &excludeRanges)
 
 	sort.Ints(numbers)
 	return numbers
 }
 
+// Format a slice of numbers to a set of ranges in a string
 func formatNumbers(numbers []int) string {
 	var numbersStr []string
 	var lastNumber int
@@ -90,6 +101,6 @@ func main() {
 	includes := getInput("Includes: ")
 	excludes := getInput("Excludes: ")
 
-	numbers := getNumbers(includes, excludes)
+	numbers := parseIncludesAndExcludesToNumbers(includes, excludes)
 	fmt.Printf("Numbers: %s\n", formatNumbers(numbers))
 }
